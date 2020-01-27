@@ -13,7 +13,7 @@ Plugin.load = function (params, callback) {
         res.render('admin/plugins/' + pluginData.nbbId, pluginData || {});
     };
 
-    Meta.settings.get(pluginData.nbbId, function (err, settings) {
+    meta.settings.get(pluginData.nbbId, function (err, settings) {
         if (err)
             return callback(err);
         if (!settings) {
