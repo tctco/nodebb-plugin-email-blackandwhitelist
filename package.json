@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-email-blacklist",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "nodebb email blacklist",
   "main": "library.js",
   "repository": {
@@ -13,7 +13,7 @@
     "url": "https://github.com/Annihil/nodebb-plugin-email-blacklist/issues"
   },
   "homepage": "https://github.com/Annihil/nodebb-plugin-email-blacklist#readme",
-   "nbbpm": {
-      "compatibility": "^1.0.1"
-    }
+  "nbbpm": {
+    "compatibility": "^1.0.1"
+  }
 }
