@@ -31,15 +31,27 @@ Plugin.load = function (params, callback) {
     });
 };
 
-Plugin.filterEmailRegister = function (regData, next) {
-    if (regData && regData.userData && regData.userData.email) {
-        if (isBlacklistedDomain(regData.userData.email))
-            return next(new Error('Blacklisted email provider.'));
-        if (pluginSettings.isTempMailEnabled === 'on')
-            return isTempMail(regData.userData.email, regData, next);
+Plugin.onEmailSave = async (data) => {
+    if (isBlacklistedDomain(data.email)) {
+        throw new Error('Blacklisted email provider.');
     }
-    return next(null, regData);
+
+    if (pluginSettings.isTempMailEnabled === 'on' && !await isTempMail(data.email)) {
+        throw new Error('Blacklisted email provider.');
+    }
+
+    return data;
 };
+
+// Plugin.filterEmailRegister = function (regData, next) {
+//     if (regData && regData.userData && regData.userData.email) {
+//         if (isBlacklistedDomain(regData.userData.email))
+//             return next(new Error('Blacklisted email provider.'));
+//         if (pluginSettings.isTempMailEnabled === 'on')
+//             return isTempMail(regData.userData.email, regData, next);
+//     }
+//     return next(null, regData);
+// };
 
 Plugin.filterEmailUpdate = function (data, next) {
     if (data && data.email) {
@@ -60,26 +72,31 @@ function isBlacklistedDomain(email) {
     return false;
 }
 
-function isTempMail(email, data, next) {
-    https.request({
-        host: 'www.istempmail.com',
-        path: '/api-public/check/' + email
-    }, function (res) {
-        var body = '';
-        res.on('data', function (chunk) {
-            body += chunk;
-        });
-        res.on('end', function () {
-            winston.info('[plugins/' + pluginData.nbbId + '] isTempMail: ' + body);
-            var jsonBody = JSON.parse(body);
-            if ("blocked" in jsonBody && jsonBody.blocked)
-                return next(new Error('Blacklisted email provider.'));
-            return next(null, data);
-        }).on('error', function(err) {
-            winston.warn('[plugins/' + pluginData.nbbId + '] Error with the request:', err.message);
-            return next(null, data);
-        });
-    }).end();
+function isTempMail(email) {
+    // Note: does not work, isTempMail is now a paid service and requires an API token
+    return new Promise((resolve, reject) => {
+        https.request({
+            host: 'www.istempmail.com',
+            path: '/api-public/check/' + email
+        }, function (res) {
+            var body = '';
+            res.on('data', function (chunk) {
+                body += chunk;
+            });
+            res.on('end', function () {
+                winston.info('[plugins/' + pluginData.nbbId + '] isTempMail: ' + body);
+                var jsonBody = JSON.parse(body);
+                if ("blocked" in jsonBody && jsonBody.blocked) {
+                    return resolve(false);
+                }
+
+                resolve(true);
+            }).on('error', function(err) {
+                winston.warn('[plugins/' + pluginData.nbbId + '] Error with the request:', err.message);
+                reject(err);
+            });
+        }).end();
+    });
 }
 
 Plugin.admin = {

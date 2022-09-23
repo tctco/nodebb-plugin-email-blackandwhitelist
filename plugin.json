@@ -2,14 +2,16 @@
 	"id": "nodebb-plugin-email-blacklist",
 	"name": "Email Blacklist",
 	"description": "Blacklist email domains that you don't desire",
-    "url": "https://github.com/Annihil/nodebb-plugin-email-blacklist",
+    "url": "https://github.com/NodeBB-Community/nodebb-plugin-email-blacklist",
     "library": "./library.js",
     "templates": "templates",
     "hooks": [
     	{"hook": "static:app.load", "method": "load"},
         {"hook": "filter:admin.header.build", "method": "admin.menu"},
-        {"hook": "filter:register.check", "method": "filterEmailRegister"},
+        {"hook": "filter:user.saveEmail", "method": "onEmailSave"},
         {"hook": "filter:user.updateProfile", "method": "filterEmailUpdate"}
     ],
-    "faIcon": "fa-envelope"
+	"modules": {
+		"../admin/plugins/email-blacklist.js": "./static/lib/admin.js"
+	}
 }

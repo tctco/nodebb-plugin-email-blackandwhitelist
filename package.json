@@ -14,6 +14,6 @@
   },
   "homepage": "https://github.com/Annihil/nodebb-plugin-email-blacklist#readme",
   "nbbpm": {
-    "compatibility": "^1.0.1"
+    "compatibility": "^1.19.0 || ^2.0.0"
   }
 }
