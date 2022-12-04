@@ -35,6 +35,9 @@ Plugin.onEmailSave = async (data) => {
     if (isBlacklistedDomain(data.email)) {
         throw new Error('Blacklisted email provider.');
     }
+    if (!isWhitelistedDomain(data.email)) {
+        throw new Error('Not whitelisted email provider.')
+    }
 
     if (pluginSettings.isTempMailEnabled === 'on' && !await isTempMail(data.email)) {
         throw new Error('Blacklisted email provider.');
@@ -57,6 +60,8 @@ Plugin.filterEmailUpdate = function (data, next) {
     if (data && data.email) {
         if (isBlacklistedDomain(data.email))
             return next(new Error('Blacklisted email provider.'));
+        if (!isWhitelistedDomain(data.email))
+            return next(new Error('Not whitelisted email provider.'));
         if (pluginSettings.isTempMailEnabled === 'on')
             return isTempMail(data.email, data, next);
     }
@@ -66,6 +71,15 @@ Plugin.filterEmailUpdate = function (data, next) {
 function isBlacklistedDomain(email) {
     var domain = email.substring(email.indexOf('@') + 1);
     var lines = pluginSettings.domains.split('\n');
+    for (var i = 0; i < lines.length; i++)
+        if (domain === lines[i].trim())
+            return true;
+    return false;
+}
+
+function isWhitelistedDomain(email) {
+    var domain = email.substring(email.indexOf('@') + 1);
+    var lines = pluginSettings.domainswhite.split('\n');
     for (var i = 0; i < lines.length; i++)
         if (domain === lines[i].trim())
             return true;
